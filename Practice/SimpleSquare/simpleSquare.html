@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<!-- This is a simple html document with a vertex shader and a fragment shader -->
+<!-- This is how you make a comment -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+
+<!-- Create a title in the browser Tab  -->
+<title>Moving Square</title>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform float time;
+varying vec3 position;
+
+void main()
+{
+    // rotation matrix 
+    // I think its off but i don't remember where the uniforms are supposed to be lmao
+    mat4 rot = mat4(
+        cos(time), -sin(time), 0, 0,
+        sin(time), cos(time),0 ,0,
+        0,0,1,0,
+        0,0,0,1
+    );
+    position = vec3(vPosition) + vec3(sin(time), cos(time), -sin(time));
+
+    gl_Position = rot * vPosition + vec4(sin(time)/2.0,-cos(time)/2.0,0,0);
+}
+</script>
+
+
+<!-- This is the fragment shader  -->
+<!-- It is setting the color of the square  -->
+<!-- color defined by (Red, Green, Blue, 1.0)  -->
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec3 position;
+
+void main()
+{
+	// This is a comment
+    gl_FragColor = vec4( position.x, position.y, position.z, 1.0 );
+}
+</script>
+
+<!-- Here are the files used by this 0program"  -->
+<!-- If Common folder not in correct place, nothing will display  -->
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="simpleSquare.js"></script>
+</head>   
+
+<!-- Here is some text for the html doc  -->
+<!-- Good practice: describe what the program does and any user interaction available -->
+<!-- The text can go anywhere on the page  -->
+
+<body>
+<div> Simple Square Demo: Get started with html, javascript, and webgl
+</div>
+<br>
+<div> Try this:
+<ul>
+<li> Change the color of the square (see simpleSquare.html)</li>
+<li> Change the shape of the square  (see simpleSquare.js)</li>
+<li> Move a vertex outside of the [-1,1] square (see simpleSquare.js) </li>
+</ul>
+</div>
+
+<!-- Create the window for the square with  canvas  -->
+<!-- Specify the size in pixels -->
+<!--    A border helps when getting started learning computer graphics -->
+
+ <canvas id="gl-canvas" width="512" height="512" style="border:2px solid #000000;"> 
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+</canvas>
+
+<p>
+Activate debugging in your browser with F12 and select "Console" in the debugger menu.</p>
+</body>
+</html>
