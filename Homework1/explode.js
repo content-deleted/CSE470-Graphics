@@ -15,6 +15,7 @@ var gl;
 //store the vertices
 //Each triplet represents one triangle
 var vertices = [];
+var normals = [];
 var animationFlag = [];
 
 //store a color for each vertex
@@ -57,16 +58,23 @@ window.onload = function init()
     // we fill the animation flag buffer with ones and zero's depending on if the 
     // triangle is part of the core or not
 
+    // added normals so that the outer triangles seperate 
     for(i = 1; i <= centerTriangles; i++) {
         // inner part
         vertices.push(vec2(0,0));
         vertices.push( generatePointOnCircle(i-1, centerTriangles, radius) );
         vertices.push( generatePointOnCircle(i, centerTriangles, radius) );
+        normals.push ( generatePointOnCircle(i, centerTriangles, 1) );
+        normals.push ( generatePointOnCircle(i, centerTriangles, 1) );
+        normals.push ( generatePointOnCircle(i, centerTriangles, 1) );
         
         // outer part
         vertices.push( generatePointOnCircle(i, centerTriangles, radius) );
         vertices.push( generatePointOnCircle(i-1, centerTriangles, radius) );
         vertices.push( generatePointOnCircle(i/2, centerTriangles/2, radius*2) );
+        normals.push( generatePointOnCircle(i/2, centerTriangles/2, radius) );
+        normals.push( generatePointOnCircle(i/2, centerTriangles/2, radius) );
+        normals.push( generatePointOnCircle(i/2, centerTriangles/2, radius) );
         
         // fill flag
         animationFlag = animationFlag.concat([0,0,0,1,1,1]);
@@ -123,6 +131,16 @@ window.onload = function init()
     var vFlag = gl.getAttribLocation( program, "vFlag" );
     gl.vertexAttribPointer( vFlag, 1, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vFlag );
+
+    // normal buffer
+    var nBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW );
+	
+	// Associate shader variable for normals
+	var vNormal = gl.getAttribLocation( program, "vNormal" );
+    gl.vertexAttribPointer( vNormal, 2, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vNormal );
 
     timeLocation = gl.getUniformLocation(program, "time");
 	

@@ -17,12 +17,13 @@ uniform float time;
 //incoming color attribute and varying for fragment shader
 attribute vec3 vColor;
 attribute float vFlag;
+attribute vec2 vNormal;
 varying vec4 color;
 
 void main()
 {
     float localtime = time * vFlag;
-    float scale = cos(localtime);
+    float scale = 2.5*cos(localtime);
     // matrix rotates and scales
     // since our local time variable is multiplied by the vFlag this matrix will do 
     // nothing if the triangle is part of the core (vFlag == 0)
@@ -33,7 +34,7 @@ void main()
         0,0,0,scale
     );
 
-    gl_Position = vPosition *rot;
+    gl_Position = vPosition * rot + sin(localtime)*vec4(vNormal,0,0);
 
 	
     color = vec4(vColor.x+abs(sin(localtime))*0.5, vColor.y+abs(sin(localtime))*0.5, vColor.z+abs(sin(localtime)), 1.0);
