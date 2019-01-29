@@ -11,56 +11,32 @@
 // This is GLSL code (not HTML5)
 
 attribute vec4 vPosition;
-attribute vec3 vNormal;
-attribute vec2 vTextureCoord;
-
 //HW470: uniforms to control explosion and color change
-uniform mat4 View; 
-uniform mat4 Projection; 
 uniform float time;
-uniform float rotation;
-uniform vec3 offset;
-
-uniform sampler2D noiseSampler;
-uniform sampler2D rampSampler;
 
 //incoming color attribute and varying for fragment shader
 attribute vec3 vColor;
-
-//stuff for the fragshader
+attribute float vFlag;
 varying vec4 color;
-varying vec2 texCoord;
-varying vec3 foffset;
-varying float ftime;
 
 void main()
 {
-
-    // explosion offset
-    vec4 disp = texture2D(noiseSampler, vTextureCoord); 
-    float d = disp.x * offset.x + disp.y * offset.y + disp.z * offset.z; 
-    vec4 expOffset = vec4(vNormal * d * (time * time) / 10.0,0);
-
+    float localtime = time * vFlag;
+    float scale = cos(localtime);
+    // matrix rotates and scales
+    // since our local time variable is multiplied by the vFlag this matrix will do 
+    // nothing if the triangle is part of the core (vFlag == 0)
     mat4 rot = mat4(
-        cos(rotation), 0, sin(rotation), 0,
-        0, 1, 0, 0,
-        -sin(rotation),0,cos(rotation), 0,
-        0,0,0,1
+        scale*cos(localtime), sin(localtime), 0, 0,
+        -sin(localtime), scale*cos(localtime), 0, 0,
+        0,0,scale, 0,
+        0,0,0,scale
     );
-    //vec4((time / 100.0) * vNormal, 0)
 
-    // We use our rotation matrix and offset first
-    vec4 worldPos = rot * (vPosition + expOffset);
-    vec4 viewPos = View * worldPos;
-    gl_Position = Projection * viewPos;
-    
-    //set the varying color for the fragment shader 
-    color = vec4(vPosition.x, vPosition.y, vPosition.z, 1);
-    
-    //set pass through to frag
-    texCoord = vTextureCoord;
-    foffset = offset;
-    ftime = time/1.5;
+    gl_Position = vPosition *rot;
+
+	
+    color = vec4(vColor.x+abs(sin(localtime))*0.5, vColor.y+abs(sin(localtime))*0.5, vColor.z+abs(sin(localtime)), 1.0);
 }
 </script>
 
@@ -69,27 +45,19 @@ void main()
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 
+// This is GLSL code (not HTML5)
+
 precision mediump float;
 
-// From the vertex shader
+// Color coming in
 varying vec4 color;
-varying vec2 texCoord;
-varying vec3 foffset;
-varying float ftime;
 
-uniform sampler2D noiseSampler;
-uniform sampler2D rampSampler;
 
-void main()
+void
+main()
 {
    //pass color to fragment shader
-   vec4 noise = texture2D(noiseSampler, texCoord); 
-    
-   float d = (noise.r*foffset.x + noise.g*foffset.y + noise.b*foffset.z)* (ftime);
-   if( 0.0 > 1.2 - d * ftime) discard;
-   vec4 c = texture2D (rampSampler, vec2((1.0-d*ftime), 0.5) );
-
-   gl_FragColor = c;
+    gl_FragColor = color;
 }
 </script>
 
@@ -99,19 +67,6 @@ void main()
 <script type="text/javascript" src="../Common/MV.js"></script>
 <script type="text/javascript" src="explode.js"></script>
 </head>   
-
-<style>
-canvas {
-  position:absolute;
-  border:2px;
-}
-button {
-  position:absolute;
-  left:10px;
-  top:260px;
-}
-
-</style>
 
 <body>
 <!--HW470: Add text to communicate what program does -->
@@ -123,18 +78,23 @@ button {
 <strong>Date: </strong>January 2019</br>
 
 </br>
-<strong>Description: </strong></br>This program is the first homework for cse 470
+<strong>Description: </strong></br>This program displays movement of solid color triangles which explode out from a core
 </br>
 </br>
 <strong>How did you map color from the initial (r,g,b) to white?</strong></br>
-HW470: describe what you did
+I add the absolute value of the current time to our vColor attribute in the vertex shader before passing it along to the fragment shader which is just a pass through. The current time I'm passing into the shader is offset a bit in the js side so that the triangles sit at the core shape for a bit longer and dont animate coming back in.
 </br>
 </br>
+<strong>Resources: </strong>Prof. Angel's codes, WebGL 2.0 Reference Guide</br>
 </br>
 </div>
-<canvas id="gl-canvas" width="512" height="512" >
+<div>I made this before I knew the requirements, its way cooler: 
+<a href="./betterExplosion/explode.html">Better Explosion</a> </div> 
+</br>
+
+<canvas id="gl-canvas" width="512" height="512" style="border:2px solid #000000;">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-<button id="restartButton">Restart</button>
-<button id="pauseButton" style="left:80px;">Pause</button>
+
 </body>
+</html>
