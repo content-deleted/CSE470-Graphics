@@ -1,3 +1,8 @@
+
+<!-- Author: Jacob Hann -->
+
+<!-- Date: Feb 2019 -->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -98,11 +103,6 @@ main()
                   background: #4CAF50;
                   cursor: pointer;
                 }
-                button {
-                    position:absolute;
-                    left:10px;
-                    top:260px;
-                }
         </style>
 
 <!--HW470: Add text to communicate what program does -->
@@ -114,20 +114,21 @@ main()
 <strong>Date: </strong>Feburary 2019</br>
 
 </br>
-<strong>Description: </strong></br> This program displays some rotating cubes I guess
+<strong>Description: </strong></br> This program displays some rotating cubes and one still center cube. </br>
+You can click on the other cubes to rotate the center cube and adjust the slider to change their size.
 </br>
 </br>
 <strong>Functionality: </strong>Click on outer cubes to change the rotation of inner cube</br>
 </br>
 </br>
-<strong>Parameters: </strong>Color, position, world, view, projection matrixes, scale, rotation speed</br>
+<strong>Parameters: </strong>Color, position, world, view, projection matrixes </br>
 </br>
 </br>
 <strong>Resources: </strong>Prof. Angel's codes, WebGL 2.0 Reference Guide</br>
 </br>
 </div>
 
-<button id="restartButton">Restart</button>
+<button id="restartButton"style="position:absolute;left:10px;top:350px;">Restart</button>
 <canvas id="gl-canvas" width="512" height="512" style="border:2px solid #000000;">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
@@ -135,7 +136,13 @@ Oops ... your browser doesn't support the HTML5 canvas element
 <strong>Size </strong>
 </br>
 <div class="slidecontainer">
-    <input type="range" min="1" max="100" value="20" class="slider" id="size">
+    <input type="range" min="10" max="100" value="20" class="slider" id="size">
+</div>
+</br>
+<strong>Speed </strong>
+</br>
+<div class="slidecontainer">
+    <input type="range" min="0" max="20" value="7" class="slider" id="speed">
 </div>
 </body>
 </html>

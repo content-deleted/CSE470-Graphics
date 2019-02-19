@@ -49,8 +49,6 @@ function quad(a, b, c, d)
     
     let indices = [ a, b, c, a, c, d ];
 
-    //console.log("CreateCube: indices = ",indices);
-
     for ( let i = 0; i < indices.length; ++i ) {
         cubeVertices.push( vertices[indices[i]] );
 		cubeColor.push([d/7,0.5,a/14 + b /14, 1.0]);
@@ -73,6 +71,7 @@ var worldMatrixLocation;
 var delay = 20;
 
 var slider;
+var speedSlider;
 
 // control variables for the main cube
 var mainCube = {
@@ -82,7 +81,7 @@ var mainCube = {
     active: false,
 };
 
-var thresholdDistance = 30; // this is measured in px
+var thresholdDistance = 0.35; // this is measured in percentage of canvas
 
 // =============== function init ======================
  
@@ -102,17 +101,16 @@ window.onload = function init()
         y = -(y - 256)/256;
 
         let nearest;
-        let nearDist= 9999999;
-        console.log(cubeObjects);
+        let nearDist = 9999999;
+        
         cubeObjects.forEach(  cube => {
             let dist = Math.abs(x - cube.position[0]) + Math.abs(y - cube.position[1]);
+
             if(dist < nearDist) {
                 nearest = cube;
                 nearDist = dist;
             }
         });
-        
-        console.log(nearDist);
 
         if( nearDist < thresholdDistance ){
             // activate the cube if it hasnt been
@@ -121,7 +119,6 @@ window.onload = function init()
             mainCube.rotation = nearest.rotation;
             mainCube.axis = normalize(nearest.position);
         }
-        console.log("x: " + x + " y: " + y); 
     }, false);
 
     // add button to reset cube
@@ -133,6 +130,7 @@ window.onload = function init()
     };
 
     slider = document.getElementById("size");
+    speedSlider = document.getElementById("speed");
 
 	// gl is a canvas object
     gl = WebGLUtils.setupWebGL( canvas );
@@ -189,11 +187,11 @@ window.onload = function init()
     worldMatrixLocation = gl.getUniformLocation(program, "World");
     
     // These uniforms do not change
-    let viewMatrix = lookAt(vec3(0,0,-1), vec3(0,0,0), vec3(0,1,0));
+    let viewMatrix = lookAt(vec3(0,0,-2), vec3(0,0,0), vec3(0,1,0));
     let viewLocation = gl.getUniformLocation(program, "View");
     gl.uniformMatrix4fv(viewLocation, false, flatten(viewMatrix));
 
-    let projectionMatrix = perspective(100, 1, 0.1, 100);
+    let projectionMatrix = perspective(65, 1, 0.1, 100);
     let projectionLocation = gl.getUniformLocation(program, "Projection");
     gl.uniformMatrix4fv(projectionLocation, false, flatten(projectionMatrix));
     
@@ -210,17 +208,20 @@ window.onload = function init()
     
     // set slider
     slider.value = 20;
+    speedSlider.value = 5;
 
     render();
 };
 
-const speed = 0.07;
+var speed = 0.5;
 var currentTime = 0;
 
 function render()
 {
     // clear the screen 
     gl.clear( gl.COLOR_BUFFER_BIT );
+
+    speed = speedSlider.value / 10;
     
     currentTime += speed;
 
@@ -239,7 +240,7 @@ function render()
         gl.drawArrays( gl.TRIANGLES, 0, 36 );
 
         // update rotation
-        cube.rotation += 0.5;
+        cube.rotation += speed;
     });
 
     let Model = mat4();
