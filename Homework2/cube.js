@@ -74,6 +74,16 @@ var delay = 20;
 
 var slider;
 
+// control variables for the main cube
+var mainCube = {
+    position: vec3(0,0,0),
+    rotation: 0.0,
+    axis: vec3(0,1,0),
+    active: false,
+};
+
+var thresholdDistance = 30; // this is measured in px
+
 // =============== function init ======================
  
 // When the page is loaded into the browser, start webgl stuff
@@ -82,12 +92,45 @@ window.onload = function init()
 	// notice that gl-canvas is specified in the html code
     canvas = document.getElementById( "gl-canvas" );
 
-    canvas.addEventListener('click', function(event) {
-        var rect = this.getBoundingClientRect();
+    // event called when user clicks on the canvas
+    canvas.addEventListener('click', (event) => {
+        var rect = canvas.getBoundingClientRect();
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;
+
+        x = -(x - 256)/256;
+        y = -(y - 256)/256;
+
+        let nearest;
+        let nearDist= 9999999;
+        console.log(cubeObjects);
+        cubeObjects.forEach(  cube => {
+            let dist = Math.abs(x - cube.position[0]) + Math.abs(y - cube.position[1]);
+            if(dist < nearDist) {
+                nearest = cube;
+                nearDist = dist;
+            }
+        });
+        
+        console.log(nearDist);
+
+        if( nearDist < thresholdDistance ){
+            // activate the cube if it hasnt been
+            mainCube.active = true;
+
+            mainCube.rotation = nearest.rotation;
+            mainCube.axis = normalize(nearest.position);
+        }
         console.log("x: " + x + " y: " + y); 
     }, false);
+
+    // add button to reset cube
+    let restartButton = document.getElementById("restartButton");
+
+    restartButton.onclick = () => {
+        mainCube.active = false;
+        mainCube.rotation = 0;
+    };
 
     slider = document.getElementById("size");
 
@@ -112,7 +155,6 @@ window.onload = function init()
         cubeObjects.push
         (
             {
-                indexStart:cubeObjects.length*36,
                 position: generatePointOnCircle(i+1, 8, 0.75),
                 rotation: 0.0,
             }
@@ -200,8 +242,14 @@ function render()
         cube.rotation += 0.5;
     });
 
+    let Model = mat4();
+    if(mainCube.active) {
+        mainCube.rotation = cubeObjects[0].rotation;
+        Model = rotate(mainCube.rotation, mainCube.axis );
+    }
+
     // Draw the middle cube
-    let World = scalem(currentScale,currentScale,currentScale)
+    let World = mult(Model, scalem(currentScale,currentScale,currentScale) );
     gl.uniformMatrix4fv(worldMatrixLocation, false, flatten(World));
     gl.drawArrays( gl.TRIANGLES, 0, 36 );
 	
